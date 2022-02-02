@@ -2,13 +2,22 @@
 ##############################################################################
 # Terraform Providers
 ##############################################################################
-terraform {
+#terraform {
 #   required_providers {
 #     ibm = {
 #       source = "IBM-Cloud/ibm"
 #       version = ">= 1.36.0"
 #     }
 #   }
+#}
+
+terraform {
+  required_version = ">=0.13"
+  required_providers {
+    ibm = {
+      source = "IBM-Cloud/ibm"
+    }
+  }
 }
 
 provider "ibm" {
