@@ -12,8 +12,8 @@ resource "ibm_container_vpc_worker_pool" "logging_pool" {
     for_each = var.vpc_zone_names
 
     content {
-      name      = zones.value
-      subnet_id = zones.value.subnet_id
+      name      = zones.value["name"]
+      subnet_id = zones.value["subnet_id"]
     }
   }
 }
