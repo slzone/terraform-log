@@ -11,11 +11,24 @@
 #   }
 # }
 
+# terraform {
+#   required_version = ">=0.13"
+#   required_providers {
+#     ibm = {
+#       source = "IBM-Cloud/ibm"
+#     }
+#   }
+# }
+
 terraform {
   required_version = ">=0.13"
   required_providers {
     ibm = {
       source = "IBM-Cloud/ibm"
+    }
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = ">=1.8.1"
     }
   }
 }
