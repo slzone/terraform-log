@@ -116,7 +116,8 @@ resource "null_resource" "elastic-search-operator-subscription" {
 
 
 resource "kubernetes_namespace" "logging-namespace" {
-  depends_on = [kubernetes_namespace.elasticsearch-namespace]
+  depends_on = [null_resource.elastic-search-operator-subscription]
+  #depends_on = [kubernetes_namespace.elasticsearch-namespace]
   metadata {
     name = "openshift-logging"
     annotations = {
