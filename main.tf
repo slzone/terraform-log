@@ -52,6 +52,14 @@ data "ibm_container_cluster_config" "cluster" {
   config_dir        = var.schematics == true ? "/tmp/.schematics" : "."
 }
 
+provider "kubernetes" {
+   version = ">=1.8.1"
+   host                   = data.ibm_container_cluster_config.cluster.host
+   client_certificate     = data.ibm_container_cluster_config.cluster.admin_certificate
+   client_key             = data.ibm_container_cluster_config.cluster.admin_key
+   cluster_ca_certificate = data.ibm_container_cluster_config.cluster.ca_certificate
+}
+
 //
 // The install and configuration of the elasticsearch and cluster logging operators is based on the
 // CLI documentation found here: https://docs.openshift.com/container-platform/4.6/logging/cluster-logging-deploying.html
