@@ -2,23 +2,23 @@
 
 // Create a dedicated worker pool for logging (and eventually monitoring)
 
-resource "ibm_container_vpc_worker_pool" "logging_pool" {
-  provider = kubernetes.kbn
+# resource "ibm_container_vpc_worker_pool" "logging_pool" {
+#   provider = kubernetes.kbn
 
-  cluster          = var.cluster_name
-  worker_pool_name = "${var.prefix}-logging"
-  flavor           = var.log_flavor
-  vpc_id           = var.vpc_id
-  worker_count     = "1"
-  resource_group_id = var.resource_group_id
-  dynamic "zones" {
-    for_each = (var.vpc_zone_names != null ? var.worker_zones : {})
-    content {
-      name      = zones.key
-      subnet_id = zones.value.subnet_id
-    }
-  }
-}
+#   cluster          = var.cluster_name
+#   worker_pool_name = "${var.prefix}-logging"
+#   flavor           = var.log_flavor
+#   vpc_id           = var.vpc_id
+#   worker_count     = "1"
+#   resource_group_id = var.resource_group_id
+#   dynamic "zones" {
+#     for_each = (var.vpc_zone_names != null ? var.worker_zones : {})
+#     content {
+#       name      = zones.key
+#       subnet_id = zones.value.subnet_id
+#     }
+#   }
+# }
 
 // Taint the "logging_pool" worker pool so that only logging pods (such as the ElasticSearch server) will
 // run run in the "logging_pool". The intention is to keep the logging pods away from production worker
@@ -27,32 +27,32 @@ resource "ibm_container_vpc_worker_pool" "logging_pool" {
 // The Terraform Slack channel mentioned that in the future it will be possible to Taint directly from Terraform.
 
 
-resource "null_resource" "taint_logging_pool" {
-  depends_on = [ibm_container_vpc_worker_pool.logging_pool]
+# resource "null_resource" "taint_logging_pool" {
+#   depends_on = [ibm_container_vpc_worker_pool.logging_pool]
 
-  provisioner "local-exec" {
-    interpreter = ["bash", "-c"]
+#   provisioner "local-exec" {
+#     interpreter = ["bash", "-c"]
 
-    command = <<COMMAND
-            echo ${ibm_container_vpc_worker_pool.logging_pool.worker_pool_name} ; \
-            echo ${ibm_container_vpc_worker_pool.logging_pool.cluster} ; \
-            echo ${var.resource_group} ; \
-            ibmcloud login --apikey ${var.ibmcloud_api_key} -r ${var.region} -g ${var.resource_group} --quiet ; \
-            ibmcloud oc worker-pool taint set \
-                --worker-pool ${ibm_container_vpc_worker_pool.logging_pool.worker_pool_name} \
-                --cluster ${ibm_container_vpc_worker_pool.logging_pool.cluster} \
-                --taint logging-monitoring=node:NoExecute -f -q
-        COMMAND
+#     command = <<COMMAND
+#             echo ${ibm_container_vpc_worker_pool.logging_pool.worker_pool_name} ; \
+#             echo ${ibm_container_vpc_worker_pool.logging_pool.cluster} ; \
+#             echo ${var.resource_group} ; \
+#             ibmcloud login --apikey ${var.ibmcloud_api_key} -r ${var.region} -g ${var.resource_group} --quiet ; \
+#             ibmcloud oc worker-pool taint set \
+#                 --worker-pool ${ibm_container_vpc_worker_pool.logging_pool.worker_pool_name} \
+#                 --cluster ${ibm_container_vpc_worker_pool.logging_pool.cluster} \
+#                 --taint logging-monitoring=node:NoExecute -f -q
+#         COMMAND
 
-  }
-}
-
-# data "ibm_container_cluster_config" "cluster" {
-#   resource_group_id = var.resource_group_id
-#   cluster_name_id   = var.cluster_name
-#   admin             = true
-#   config_dir        = var.schematics == true ? "/tmp/.schematics" : "."
+#   }
 # }
+
+data "ibm_container_cluster_config" "cluster" {
+  resource_group_id = var.resource_group_id
+  cluster_name_id   = var.cluster_name
+  admin             = true
+  config_dir        = var.schematics == true ? "/tmp/.schematics" : "."
+}
 
 # provider "kubernetes" {
 #    version = ">=1.8.1"
