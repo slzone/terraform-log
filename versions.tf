@@ -39,7 +39,7 @@ terraform {
 # }
 
 provider "kubernetes" {
-   alias = kbn
+   alias = "kbn"
    version = ">=1.8.1"
    host                   = data.ibm_container_cluster_config.cluster.host
    client_certificate     = data.ibm_container_cluster_config.cluster.admin_certificate

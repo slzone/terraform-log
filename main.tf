@@ -4,7 +4,7 @@
 
 resource "ibm_container_vpc_worker_pool" "logging_pool" {
   provider = kubernetes.kbn
-  
+
   cluster          = var.cluster_name
   worker_pool_name = "${var.prefix}-logging"
   flavor           = var.log_flavor
@@ -12,7 +12,7 @@ resource "ibm_container_vpc_worker_pool" "logging_pool" {
   worker_count     = "1"
   resource_group_id = var.resource_group_id
   dynamic "zones" {
-    for_each = var.vpc_zone_names != null ? var.worker_zones : {} )
+    for_each = (var.vpc_zone_names != null ? var.worker_zones : {})
     content {
       name      = zones.key
       subnet_id = zones.value.subnet_id
