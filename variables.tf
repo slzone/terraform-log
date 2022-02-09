@@ -18,7 +18,7 @@ variable "resource_group" {
   description = "Resource Group id in your account to host the cluster. List all available resource groups with: ibmcloud resource groups. It is created if empty"
 }
 
-variable "cluster_resource_group_id" {
+variable "resource_group_id" {
     type = string
 }
 

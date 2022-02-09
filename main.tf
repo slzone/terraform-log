@@ -47,12 +47,12 @@ resource "null_resource" "taint_logging_pool" {
   }
 }
 
-data "ibm_container_cluster_config" "cluster" {
-  resource_group_id = var.cluster_resource_group_id
-  cluster_name_id   = var.cluster_name
-  admin             = true
-  config_dir        = var.schematics == true ? "/tmp/.schematics" : "."
-}
+# data "ibm_container_cluster_config" "cluster" {
+#   resource_group_id = var.resource_group_id
+#   cluster_name_id   = var.cluster_name
+#   admin             = true
+#   config_dir        = var.schematics == true ? "/tmp/.schematics" : "."
+# }
 
 # provider "kubernetes" {
 #    version = ">=1.8.1"
