@@ -3,14 +3,16 @@
 // Create a dedicated worker pool for logging (and eventually monitoring)
 
 resource "ibm_container_vpc_worker_pool" "logging_pool" {
+  provider = kubernetes.kbn
+  
   cluster          = var.cluster_name
   worker_pool_name = "${var.prefix}-logging"
   flavor           = var.log_flavor
   vpc_id           = var.vpc_id
   worker_count     = "1"
+  resource_group_id = var.resource_group_id
   dynamic "zones" {
-    for_each = var.vpc_zone_names
-
+    for_each = var.vpc_zone_names != null ? var.worker_zones : {} )
     content {
       name      = zones.key
       subnet_id = zones.value.subnet_id
@@ -45,12 +47,12 @@ resource "null_resource" "taint_logging_pool" {
   }
 }
 
-# data "ibm_container_cluster_config" "cluster" {
-#   resource_group_id = var.resource_group_id
-#   cluster_name_id   = var.cluster_name
-#   admin             = true
-#   config_dir        = var.schematics == true ? "/tmp/.schematics" : "."
-# }
+data "ibm_container_cluster_config" "cluster" {
+  resource_group_id = var.cluster_resource_group_id
+  cluster_name_id   = var.cluster_name
+  admin             = true
+  config_dir        = var.schematics == true ? "/tmp/.schematics" : "."
+}
 
 # provider "kubernetes" {
 #    version = ">=1.8.1"
@@ -91,7 +93,7 @@ resource "kubernetes_namespace" "elasticsearch-namespace" {
 
 // It is not currently possible to create a operator group object and subscription with Terraform so this is being down with a bash script.
 
-resource "null_resource" "elastic-search-operator-subscription" {
+resource "null_resource" "elastic-search-operator" {
   depends_on = [kubernetes_namespace.elasticsearch-namespace]
 
   provisioner "local-exec" {
@@ -101,12 +103,25 @@ resource "null_resource" "elastic-search-operator-subscription" {
             ibmcloud login --apikey ${var.ibmcloud_api_key} -r ${var.region} -g ${var.resource_group} --quiet ; \
             ibmcloud ks cluster config --cluster ${var.cluster_name} --admin
             kubectl apply -f "${path.module}/elastic-search-operator.yaml"
-            kubectl apply -f "${path.module}/elastic-search-subscription.yaml"
         COMMAND
 
   }
 }
 
+resource "null_resource" "elastic-search-subscription" {
+  depends_on = [null_resource.elastic-search-operator]
+
+  provisioner "local-exec" {
+    
+
+    command = <<COMMAND
+            ibmcloud login --apikey ${var.ibmcloud_api_key} -r ${var.region} -g ${var.resource_group} --quiet ; \
+            ibmcloud ks cluster config --cluster ${var.cluster_name} --admin
+            kubectl apply -f "${path.module}/elastic-search-subscription.yaml"
+        COMMAND
+
+  }
+}
 
 // 2. Install Cluster Logging Operator involves 
     //Create a namespace for the OpenShift Elasticsearch Operator.
@@ -116,7 +131,7 @@ resource "null_resource" "elastic-search-operator-subscription" {
 
 
 resource "kubernetes_namespace" "logging-namespace" {
-  depends_on = [null_resource.elastic-search-operator-subscription]
+  depends_on = [null_resource.elastic-search-subscription]
   #depends_on = [kubernetes_namespace.elasticsearch-namespace]
   metadata {
     name = "openshift-logging"
@@ -130,7 +145,7 @@ resource "kubernetes_namespace" "logging-namespace" {
   }
 }
 
-resource "null_resource" "cluster-logging-operator-subscription" {
+resource "null_resource" "cluster-logging-operator" {
   depends_on = [kubernetes_namespace.logging-namespace]
 
   provisioner "local-exec" {
@@ -140,6 +155,20 @@ resource "null_resource" "cluster-logging-operator-subscription" {
             ibmcloud login --apikey ${var.ibmcloud_api_key} -r ${var.region} -g ${var.resource_group} --quiet ; \
             ibmcloud ks cluster config --cluster ${var.cluster_name} --admin
             kubectl apply -f "${path.module}/cluster-logging-operator.yaml"
+        COMMAND
+
+  }
+}
+
+resource "null_resource" "cluster-logging-subscription" {
+  depends_on = [null_resource.cluster-logging-operator]
+
+  provisioner "local-exec" {
+    
+
+    command = <<COMMAND
+            ibmcloud login --apikey ${var.ibmcloud_api_key} -r ${var.region} -g ${var.resource_group} --quiet ; \
+            ibmcloud ks cluster config --cluster ${var.cluster_name} --admin
             kubectl apply -f "${path.module}/cluster-logging-subscription.yaml"
         COMMAND
 
@@ -153,7 +182,7 @@ resource "null_resource" "cluster-logging-operator-subscription" {
 
 
 resource "null_resource" "instantiate_cluster_logging" {
-  depends_on = [null_resource.cluster-logging-operator-subscription]
+  depends_on = [null_resource.cluster-logging-subscription]
   provisioner "local-exec" {
     
     command = <<COMMAND
