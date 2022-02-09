@@ -94,6 +94,8 @@ resource "kubernetes_namespace" "elasticsearch-namespace" {
 // It is not currently possible to create a operator group object and subscription with Terraform so this is being down with a bash script.
 
 resource "null_resource" "elastic-search-operator" {
+  provider = kubernetes.kbn
+
   depends_on = [kubernetes_namespace.elasticsearch-namespace]
 
   provisioner "local-exec" {
@@ -109,6 +111,8 @@ resource "null_resource" "elastic-search-operator" {
 }
 
 resource "null_resource" "elastic-search-subscription" {
+  provider = kubernetes.kbn
+
   depends_on = [null_resource.elastic-search-operator]
 
   provisioner "local-exec" {
@@ -131,6 +135,8 @@ resource "null_resource" "elastic-search-subscription" {
 
 
 resource "kubernetes_namespace" "logging-namespace" {
+  provider = kubernetes.kbn
+
   depends_on = [null_resource.elastic-search-subscription]
   #depends_on = [kubernetes_namespace.elasticsearch-namespace]
   metadata {
@@ -146,6 +152,8 @@ resource "kubernetes_namespace" "logging-namespace" {
 }
 
 resource "null_resource" "cluster-logging-operator" {
+  provider = kubernetes.kbn
+
   depends_on = [kubernetes_namespace.logging-namespace]
 
   provisioner "local-exec" {
@@ -161,6 +169,7 @@ resource "null_resource" "cluster-logging-operator" {
 }
 
 resource "null_resource" "cluster-logging-subscription" {
+  provider = kubernetes.kbn
   depends_on = [null_resource.cluster-logging-operator]
 
   provisioner "local-exec" {
@@ -182,6 +191,7 @@ resource "null_resource" "cluster-logging-subscription" {
 
 
 resource "null_resource" "instantiate_cluster_logging" {
+  provider = kubernetes.kbn
   depends_on = [null_resource.cluster-logging-subscription]
   provisioner "local-exec" {
     
@@ -194,6 +204,7 @@ resource "null_resource" "instantiate_cluster_logging" {
 }
 
 resource "kubernetes_namespace" "monitoring-namespace" {
+  provider = kubernetes.kbn
   depends_on = [kubernetes_namespace.elasticsearch-namespace]
   metadata {
     name = "my-grafana-operator"
@@ -208,6 +219,7 @@ resource "kubernetes_namespace" "monitoring-namespace" {
 }
 
 resource "null_resource" "instantiate-monitoring" {
+  provider = kubernetes.kbn
   depends_on = [kubernetes_namespace.monitoring-namespace]
   provisioner "local-exec" {
     command = <<COMMAND
