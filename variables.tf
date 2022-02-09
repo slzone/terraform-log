@@ -31,11 +31,11 @@ variable "resource_group_id" {
 #   }
 # }
 
-# variable "schematics" {
-#   type    = bool
-#   default = true
-#   description = "Set to false if you are not running this template in schematics"
-# }
+variable "schematics" {
+  type    = bool
+  default = true
+  description = "Set to false if you are not running this template in schematics"
+}
 
 
 ##################################################################################
