@@ -79,6 +79,7 @@ data "ibm_container_cluster_config" "cluster" {
         //Create a Subscription object.
 
 resource "kubernetes_namespace" "elasticsearch-namespace" {
+  provider = kubernetes.logcluster
   metadata {
     name = "openshift-operators-redhat"
     annotations = {
@@ -135,7 +136,7 @@ resource "null_resource" "elastic-search-subscription" {
 
 
 resource "kubernetes_namespace" "logging-namespace" {
-  #provider = kubernetes.kbn
+  provider = kubernetes.logcluster
 
   #depends_on = [null_resource.elastic-search-subscription]
   #depends_on = [kubernetes_namespace.elasticsearch-namespace]
@@ -204,7 +205,7 @@ resource "null_resource" "instantiate_cluster_logging" {
 }
 
 resource "kubernetes_namespace" "monitoring-namespace" {
-  #provider = kubernetes.kbn
+  provider = kubernetes.logcluster
   #depends_on = [kubernetes_namespace.elasticsearch-namespace]
   metadata {
     name = "my-grafana-operator"
