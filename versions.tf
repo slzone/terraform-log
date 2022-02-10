@@ -26,10 +26,10 @@ terraform {
     ibm = {
       source = "IBM-Cloud/ibm"
     }
-    # kubernetes = {
-    #   source  = "hashicorp/kubernetes"
-    #   version = ">=1.8.1"
-    # }
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = ">=1.8.1"
+    }
   }
 }
 
