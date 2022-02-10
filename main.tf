@@ -97,7 +97,7 @@ resource "kubernetes_namespace" "elasticsearch-namespace" {
 resource "null_resource" "elastic-search-operator" {
   #provider = kubernetes.kbn
 
-  #depends_on = [kubernetes_namespace.elasticsearch-namespace]
+  depends_on = [kubernetes_namespace.elasticsearch-namespace]
 
   provisioner "local-exec" {
     
@@ -114,7 +114,7 @@ resource "null_resource" "elastic-search-operator" {
 resource "null_resource" "elastic-search-subscription" {
   #provider = kubernetes.kbn
 
-  #depends_on = [null_resource.elastic-search-operator]
+  depends_on = [null_resource.elastic-search-operator]
 
   provisioner "local-exec" {
     
@@ -139,7 +139,7 @@ resource "kubernetes_namespace" "logging-namespace" {
   provider = kubernetes.logcluster
 
   #depends_on = [null_resource.elastic-search-subscription]
-  #depends_on = [kubernetes_namespace.elasticsearch-namespace]
+  depends_on = [kubernetes_namespace.elasticsearch-namespace]
   metadata {
     name = "openshift-logging"
     annotations = {
@@ -155,7 +155,7 @@ resource "kubernetes_namespace" "logging-namespace" {
 resource "null_resource" "cluster-logging-operator" {
   #provider = kubernetes.kbn
 
-  #depends_on = [kubernetes_namespace.logging-namespace]
+  depends_on = [kubernetes_namespace.logging-namespace]
 
   provisioner "local-exec" {
     
@@ -171,7 +171,7 @@ resource "null_resource" "cluster-logging-operator" {
 
 resource "null_resource" "cluster-logging-subscription" {
   #provider = kubernetes.kbn
-  #depends_on = [null_resource.cluster-logging-operator]
+  depends_on = [null_resource.cluster-logging-operator]
 
   provisioner "local-exec" {
     
@@ -193,7 +193,7 @@ resource "null_resource" "cluster-logging-subscription" {
 
 resource "null_resource" "instantiate_cluster_logging" {
   #provider = kubernetes.kbn
-  #depends_on = [null_resource.cluster-logging-subscription]
+  depends_on = [null_resource.cluster-logging-subscription]
   provisioner "local-exec" {
     
     command = <<COMMAND
@@ -206,7 +206,7 @@ resource "null_resource" "instantiate_cluster_logging" {
 
 resource "kubernetes_namespace" "monitoring-namespace" {
   provider = kubernetes.logcluster
-  #depends_on = [kubernetes_namespace.elasticsearch-namespace]
+  depends_on = [kubernetes_namespace.elasticsearch-namespace]
   metadata {
     name = "my-grafana-operator"
     annotations = {
@@ -221,7 +221,7 @@ resource "kubernetes_namespace" "monitoring-namespace" {
 
 resource "null_resource" "instantiate-monitoring" {
   #provider = kubernetes.kbn
-  #depends_on = [kubernetes_namespace.monitoring-namespace]
+  depends_on = [kubernetes_namespace.monitoring-namespace]
   provisioner "local-exec" {
     command = <<COMMAND
             ibmcloud login --apikey ${var.ibmcloud_api_key} -r ${var.region} -g ${var.resource_group} --quiet ; \
