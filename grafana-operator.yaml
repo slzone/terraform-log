@@ -14,8 +14,6 @@ metadata:
   namespace: my-grafana-operator
 spec:
   channel: v4
-  installPlanApproval: Automatic
   name: grafana-operator
   source: community-operators
   sourceNamespace: openshift-marketplace
-  startingCSV: grafana-operator.v4.1.1
