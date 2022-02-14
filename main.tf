@@ -201,8 +201,8 @@ resource "time_sleep" "wait_10_minutes" {
 
 resource "null_resource" "instantiate_cluster_logging" {
   #provider = kubernetes.kbn
-  create_duration = "10m"
-  depends_on = [null_resource.wait_10_minutes]
+  #create_duration = "10m"
+  depends_on = [time_sleep.wait_10_minutes]
   provisioner "local-exec" {
     
     command = <<COMMAND
