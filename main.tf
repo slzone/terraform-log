@@ -191,10 +191,18 @@ resource "null_resource" "cluster-logging-subscription" {
 // It is not currently possible to create a logging instace with Terraform so this is being down with a bash script.
 
 
+resource "time_sleep" "wait_10_minutes" {
+  depends_on = [null_resource.cluster-logging-subscription]
+
+  create_duration = "10m"
+}
+
+
+
 resource "null_resource" "instantiate_cluster_logging" {
   #provider = kubernetes.kbn
   create_duration = "10m"
-  depends_on = [null_resource.cluster-logging-subscription]
+  depends_on = [null_resource.wait_10_minutes]
   provisioner "local-exec" {
     
     command = <<COMMAND
