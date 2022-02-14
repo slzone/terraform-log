@@ -193,6 +193,7 @@ resource "null_resource" "cluster-logging-subscription" {
 
 resource "null_resource" "instantiate_cluster_logging" {
   #provider = kubernetes.kbn
+  create_duration = "10m"
   depends_on = [null_resource.cluster-logging-subscription]
   provisioner "local-exec" {
     
