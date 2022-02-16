@@ -7,6 +7,32 @@
 ##################################################################################
 
 
+variable "worker_zones" {
+  type    = map
+  default = {}
+}
+
+variable "worker_nodes_per_zone" {
+  type = number
+  default = 1
+}
+
+variable "entitlement" {
+  description = "Name of entittlement, use for openshift cluster"
+  type        = string
+  default     = null
+}
+
+variable "taints" {
+  type = list(object({
+    key    = string
+    value  = string
+    effect = string
+  }))
+  description = "Set taints to worker nodes."
+  default     = null
+}
+  
 variable "ibmcloud_api_key" {
     type = string
 }
@@ -22,14 +48,11 @@ variable "resource_group_id" {
     type = string
 }
 
-# variable "prefix" {
-#   description = "Prefix to name all the provisioned resources."
+variable "labels" {
+  type    = map
+  default = {}
+}
 
-#   validation {
-#     condition     = length(var.prefix) >= 4 && length(var.prefix) <= 30
-#     error_message = "The prefix length has to be between 4 and 30 characters."
-#   }
-# }
 
 variable "schematics" {
   type    = bool
@@ -42,11 +65,11 @@ variable "schematics" {
 # Logging Configuration
 ##################################################################################
 
-# variable "log_flavor" {
-#   type        = string
-#   default     = "mx2.4x32"
-#   description = "Flavor or machine type of the logging nodes. Memory must be at least 32 GB. List all flavors for each zone with: 'ibmcloud ks flavors --zone us-east-1'. Examples: 'mx2.4x32', 'mx2.8x64'"
-# }
+variable "log_flavor" {
+  type        = string
+  default     = "mx2.4x32" 
+  description = "Flavor or machine type of the logging nodes. Memory must be at least 32 GB. List all flavors for each zone with: 'ibmcloud ks flavors --zone us-east-1'. Examples: 'mx2.4x32', 'mx2.8x64'"
+}
 
 
 ##################################################################################
@@ -58,15 +81,17 @@ variable "cluster_name" {
   description	= "Cluster name."
 }
 
-# variable "vpc_id" {
-#   type			= string
-#   description	= "VPC ID."
-# }
 
-# variable "vpc_zone_names" {
-#   type    = map
-#   default = {}
-# }
+variable "worker_pool_name" {
+  type			= string
+  description	= "pool name."
+}
+
+variable "vpc_id" {
+  type			= string
+  description	= "VPC ID."
+}
+
 
 variable "node_select" {
   type = string
@@ -77,4 +102,3 @@ variable "enable_monitoring" {
   type = bool
   default = true
 }
-

@@ -2,50 +2,39 @@
 
 // Create a dedicated worker pool for logging (and eventually monitoring)
 
-# resource "ibm_container_vpc_worker_pool" "logging_pool" {
-#   provider = kubernetes.kbn
+#####################################################
+# vpc cluster worker-pool configure
+# Copyright 2022 IBM
+#####################################################
 
-#   cluster          = var.cluster_name
-#   worker_pool_name = "${var.prefix}-logging"
-#   flavor           = var.log_flavor
-#   vpc_id           = var.vpc_id
-#   worker_count     = "1"
-#   resource_group_id = var.resource_group_id
-#   dynamic "zones" {
-#     for_each = (var.vpc_zone_names != null ? var.worker_zones : {})
-#     content {
-#       name      = zones.key
-#       subnet_id = zones.value.subnet_id
-#     }
-#   }
-# }
+ 
+resource "ibm_container_vpc_worker_pool" "pool" {
+  cluster           = var.cluster_name
+  worker_pool_name  = var.worker_pool_name
+  flavor            = var.log_flavor
+  vpc_id            = var.vpc_id
+  worker_count      = var.worker_nodes_per_zone
+  resource_group_id = var.resource_group_id
+  labels            = (var.labels != null ? var.labels : null)
+  entitlement       = (var.entitlement != null ? var.entitlement : null)
 
-// Taint the "logging_pool" worker pool so that only logging pods (such as the ElasticSearch server) will
-// run run in the "logging_pool". The intention is to keep the logging pods away from production worker
-// nodes. 
-// It is not currently possible to taint a worker pool with Terraform so this is being down with a bash script.
-// The Terraform Slack channel mentioned that in the future it will be possible to Taint directly from Terraform.
+  dynamic zones {
+    for_each = (var.worker_zones != null ? var.worker_zones : {})
+    content {
+      name      = zones.key
+      subnet_id = zones.value.subnet_id
+    }
+  }
 
-
-# resource "null_resource" "taint_logging_pool" {
-#   depends_on = [ibm_container_vpc_worker_pool.logging_pool]
-
-#   provisioner "local-exec" {
-#     interpreter = ["bash", "-c"]
-
-#     command = <<COMMAND
-#             echo ${ibm_container_vpc_worker_pool.logging_pool.worker_pool_name} ; \
-#             echo ${ibm_container_vpc_worker_pool.logging_pool.cluster} ; \
-#             echo ${var.resource_group} ; \
-#             ibmcloud login --apikey ${var.ibmcloud_api_key} -r ${var.region} -g ${var.resource_group} --quiet ; \
-#             ibmcloud oc worker-pool taint set \
-#                 --worker-pool ${ibm_container_vpc_worker_pool.logging_pool.worker_pool_name} \
-#                 --cluster ${ibm_container_vpc_worker_pool.logging_pool.cluster} \
-#                 --taint logging-monitoring=node:NoExecute -f -q
-#         COMMAND
-
-#   }
-# }
+  dynamic taints {
+    for_each = (var.taints != null ? var.taints : [])
+    content {
+      key    = taints.value.key
+      value  = taints.value.value
+      effect = taints.value.effect
+    }
+  }
+}
 
 data "ibm_container_cluster_config" "cluster" {
   resource_group_id = var.resource_group_id
@@ -54,13 +43,6 @@ data "ibm_container_cluster_config" "cluster" {
   config_dir        = var.schematics == true ? "/tmp/.schematics" : "."
 }
 
-# provider "kubernetes" {
-#    version = ">=1.8.1"
-#    host                   = data.ibm_container_cluster_config.cluster.host
-#    client_certificate     = data.ibm_container_cluster_config.cluster.admin_certificate
-#    client_key             = data.ibm_container_cluster_config.cluster.admin_key
-#    cluster_ca_certificate = data.ibm_container_cluster_config.cluster.ca_certificate
-# }
 
 //
 // The install and configuration of the elasticsearch and cluster logging operators is based on the
@@ -95,8 +77,7 @@ resource "kubernetes_namespace" "elasticsearch-namespace" {
 // It is not currently possible to create a operator group object and subscription with Terraform so this is being down with a bash script.
 
 resource "null_resource" "elastic-search-operator" {
-  #provider = kubernetes.kbn
-
+  
   depends_on = [kubernetes_namespace.elasticsearch-namespace]
 
   provisioner "local-exec" {
@@ -112,8 +93,7 @@ resource "null_resource" "elastic-search-operator" {
 }
 
 resource "null_resource" "elastic-search-subscription" {
-  #provider = kubernetes.kbn
-
+  
   depends_on = [null_resource.elastic-search-operator]
 
   provisioner "local-exec" {
@@ -138,7 +118,6 @@ resource "null_resource" "elastic-search-subscription" {
 resource "kubernetes_namespace" "logging-namespace" {
   provider = kubernetes.logcluster
 
-  #depends_on = [null_resource.elastic-search-subscription]
   depends_on = [kubernetes_namespace.elasticsearch-namespace]
   metadata {
     name = "openshift-logging"
@@ -153,8 +132,6 @@ resource "kubernetes_namespace" "logging-namespace" {
 }
 
 resource "null_resource" "cluster-logging-operator" {
-  #provider = kubernetes.kbn
-
   depends_on = [kubernetes_namespace.logging-namespace]
 
   provisioner "local-exec" {
@@ -170,9 +147,7 @@ resource "null_resource" "cluster-logging-operator" {
 }
 
 resource "null_resource" "cluster-logging-subscription" {
-  #provider = kubernetes.kbn
   depends_on = [null_resource.cluster-logging-operator]
-
   provisioner "local-exec" {
     
 
@@ -190,18 +165,14 @@ resource "null_resource" "cluster-logging-subscription" {
 // This uses the instantce.yaml script to provide the logging parameters
 // It is not currently possible to create a logging instace with Terraform so this is being down with a bash script.
 
-
 resource "time_sleep" "wait_10_minutes" {
   depends_on = [null_resource.cluster-logging-subscription]
 
   create_duration = "10m"
 }
 
-
-
 resource "null_resource" "instantiate_cluster_logging" {
-  #provider = kubernetes.kbn
-  #create_duration = "10m"
+  
   depends_on = [time_sleep.wait_10_minutes]
   provisioner "local-exec" {
     
@@ -229,7 +200,7 @@ resource "kubernetes_namespace" "monitoring-namespace" {
 }
 
 resource "null_resource" "instantiate-monitoring" {
-  #provider = kubernetes.kbn
+  
   depends_on = [kubernetes_namespace.monitoring-namespace]
   provisioner "local-exec" {
     command = <<COMMAND
