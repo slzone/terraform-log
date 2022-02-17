@@ -35,6 +35,7 @@ variable "taints" {
   
 variable "ibmcloud_api_key" {
     type = string
+    sensitive = true
 }
 variable "region" {
   description = "Region to provision the Openshift cluster. List all available regions with: ibmcloud regions"
