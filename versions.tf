@@ -26,10 +26,10 @@ terraform {
     ibm = {
       source = "IBM-Cloud/ibm"
     }
-    kubernetes = {
-      source  = "hashicorp/kubernetes"
-      version = ">=1.8.1"
-    }
+    # kubernetes = {
+    #   source  = "hashicorp/kubernetes"
+    #   version = ">=1.8.1"
+    # }
   }
 }
 
@@ -45,5 +45,4 @@ provider "kubernetes" {
    client_certificate     = data.ibm_container_cluster_config.cluster.admin_certificate
    client_key             = data.ibm_container_cluster_config.cluster.admin_key
    cluster_ca_certificate = data.ibm_container_cluster_config.cluster.ca_certificate
-   #load_config_file       = "false"
 }
