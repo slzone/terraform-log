@@ -7,12 +7,16 @@
 ##################################################################################
 
 
-variable "worker_zones" {
-  type    = map
-  default = {}
+variable "vpc_zone_names" {
+  type    = list(string)
 }
 
-variable "worker_nodes_per_zone" {
+variable "vpc_subnet_ids" {
+  type        = list(string)
+  description = "Subnet IDs"
+}
+
+variable "worker_count" {
   type = number
   default = 1
 }
@@ -102,4 +106,14 @@ variable "node_select" {
 variable "enable_monitoring" {
   type = bool
   default = true
+}
+
+
+variable "prefix" {
+  description = "Prefix to name all the provisioned resources."
+
+  validation {
+    condition     = length(var.prefix) >= 4 && length(var.prefix) <= 30
+    error_message = "The prefix length has to be between 4 and 30 characters."
+  }
 }

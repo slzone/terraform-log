@@ -2,14 +2,15 @@
 ##############################################################################
 # Terraform Providers
 ##############################################################################
-# terraform {
-#   required_providers {
-#     ibm = {
-#       source = "IBM-Cloud/ibm"
-#       version = ">= 1.36.0"
-#     }
-#   }
-# }
+terraform {
+  required_providers {
+    ibm = {
+      source = "IBM-Cloud/ibm"
+      version = ">= 1.36.0"
+    }
+  }
+  required_version = ">= 1.0"
+}
 
 # terraform {
 #   required_version = ">=0.13"
@@ -20,8 +21,8 @@
 #   }
 # }
 
-terraform {
-  required_version = ">=0.13"
+# terraform {
+#   required_version = ">=0.13"
   # required_providers {
   #   ibm = {
   #     source = "IBM-Cloud/ibm"
@@ -30,8 +31,8 @@ terraform {
     #   source  = "hashicorp/kubernetes"
     #   version = ">=1.8.1"
     # }
-  }
-}
+  #}
+# }
 
 # provider "ibm" {
 #     ibmcloud_api_key = var.ibmcloud_api_key
