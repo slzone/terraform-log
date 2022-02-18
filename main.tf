@@ -69,35 +69,31 @@ data "ibm_container_cluster_config" "cluster" {
         //Create an Operator Group object.
         //Create a Subscription object.
 
-resource "kubernetes_namespace" "elasticsearch-namespace" {
-  provider = kubernetes.logcluster
-  metadata {
-    name = "openshift-operators-redhat"
-    annotations = {
-      "openshift.io/node-selector" = var.node_select
+resource "null_resource" "elasticsearch-namespace" {
+  depends_on = [null_resource.taint_logging_pool]
 
-    }
-    labels = {
-      "openshift.io/cluster-monitoring" = var.enable_monitoring
-    }
-  }
+  provisioner "local-exec" {
+    command = <<COMMAND
+            ibmcloud login --apikey ${var.ibmcloud_api_key} -r ${var.region} -g ${var.resource_group} --quiet ; \
+            ibmcloud ks cluster config --cluster ${var.cluster_name} --admin
+            kubectl apply -f "${path.module}/elastic-search-namespace.yaml"
+        COMMAND
+        }
 }
 
 // It is not currently possible to create a operator group object and subscription with Terraform so this is being down with a bash script.
 
 resource "null_resource" "elastic-search-operator" {
   
-  depends_on = [kubernetes_namespace.elasticsearch-namespace]
+  depends_on = [null_resource.elasticsearch-namespace]
 
   provisioner "local-exec" {
-    #when    = destroy
     command = <<COMMAND
             ibmcloud login --apikey ${var.ibmcloud_api_key} -r ${var.region} -g ${var.resource_group} --quiet ; \
             ibmcloud ks cluster config --cluster ${var.cluster_name} --admin
             kubectl apply -f "${path.module}/elastic-search-operator.yaml"
         COMMAND
-
-  }
+        }
 }
 
 resource "null_resource" "elastic-search-subscription" {
@@ -122,24 +118,20 @@ resource "null_resource" "elastic-search-subscription" {
         //Create a Subscription object.
 
 
-resource "kubernetes_namespace" "logging-namespace" {
-  provider = kubernetes.logcluster
+resource "null_resource" "logging-namespace" {
+  depends_on = [null_resource.elastic-search-subscription]
 
-  depends_on = [kubernetes_namespace.elasticsearch-namespace]
-  metadata {
-    name = "openshift-logging"
-    annotations = {
-      "openshift.io/node-selector" = var.node_select
-
-    }
-    labels = {
-      "openshift.io/cluster-monitoring" = var.enable_monitoring
-    }
-  }
+  provisioner "local-exec" {
+    command = <<COMMAND
+            ibmcloud login --apikey ${var.ibmcloud_api_key} -r ${var.region} -g ${var.resource_group} --quiet ; \
+            ibmcloud ks cluster config --cluster ${var.cluster_name} --admin
+            kubectl apply -f "${path.module}/logging-namespace.yaml"
+        COMMAND
+        }
 }
 
 resource "null_resource" "cluster-logging-operator" {
-  depends_on = [kubernetes_namespace.logging-namespace]
+  depends_on = [null_resource.logging-namespace]
 
   provisioner "local-exec" {
     #when    = destroy
@@ -189,25 +181,23 @@ resource "null_resource" "instantiate_cluster_logging" {
     }
 }
 
-resource "kubernetes_namespace" "monitoring-namespace" {
-  provider = kubernetes.logcluster
-  
-  depends_on = [kubernetes_namespace.elasticsearch-namespace]
-  metadata {
-    name = "my-grafana-operator"
-    annotations = {
-      "openshift.io/node-selector" = var.node_select
 
-    }
-    labels = {
-      "openshift.io/cluster-monitoring" = var.enable_monitoring
-    }
-  }
+resource "null_resource" "monitoring-namespace" {
+  depends_on = [null_resource.elasticsearch-namespace]
+
+  provisioner "local-exec" {
+    command = <<COMMAND
+            ibmcloud login --apikey ${var.ibmcloud_api_key} -r ${var.region} -g ${var.resource_group} --quiet ; \
+            ibmcloud ks cluster config --cluster ${var.cluster_name} --admin
+            kubectl apply -f "${path.module}/monitoring-namespace.yaml"
+        COMMAND
+        }
 }
+
 
 resource "null_resource" "instantiate-monitoring" {
   
-  depends_on = [kubernetes_namespace.monitoring-namespace]
+  depends_on = [null_resource.monitoring-namespace]
   provisioner "local-exec" {
    # when    = destroy
     command = <<COMMAND
