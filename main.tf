@@ -17,13 +17,14 @@ resource "ibm_container_vpc_worker_pool" "logging_pool" {
   entitlement       = (var.entitlement != null ? var.entitlement : null)
 
   dynamic zones {
-    for_each = var.vpc_zone_names 
+    for_each = (var.worker_zones != null ? var.worker_zones : {})
     content {
-      name      = zones.value
-      subnet_id = var.vpc_subnet_ids[zones.key]
+      name      = zones.key
+      subnet_id = zones.value.subnet_id
     }
   }
 }
+
 
 resource "null_resource" "taint_logging_pool" {
     depends_on = [ibm_container_vpc_worker_pool.logging_pool]
@@ -68,6 +69,8 @@ data "ibm_container_cluster_config" "cluster" {
     //Install the OpenShift Elasticsearch Operator by creating the following objects:
         //Create an Operator Group object.
         //Create a Subscription object.
+
+
 
 resource "null_resource" "elasticsearch-namespace" {
   depends_on = [null_resource.taint_logging_pool]

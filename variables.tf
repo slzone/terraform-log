@@ -5,7 +5,10 @@
 ##################################################################################
 # General Configuration
 ##################################################################################
-
+variable "worker_zones" {
+  type    = map
+  default = {}
+}
 
 variable "vpc_zone_names" {
   type    = list(string)
