@@ -16,11 +16,11 @@ resource "ibm_container_vpc_worker_pool" "logging_pool" {
   labels            = (var.labels != null ? var.labels : null)
   entitlement       = (var.entitlement != null ? var.entitlement : null)
 
-  dynamic zones {
-    for_each = (var.worker_zones != null ? var.worker_zones : {})
+  dynamic "zones" {
+    for_each = var.vpc_zone_names
     content {
-      name      = zones.key
-      subnet_id = zones.value.subnet_id
+      name      = zones.value
+      subnet_id = zones.vpc_subnet_ids[zones.key]
     }
   }
 }
