@@ -131,15 +131,6 @@ variable "resource_group" {
   description = "Resource Group id in your account to host the cluster. List all available resource groups with: ibmcloud resource groups. It is created if empty"
 }
 
-variable "resource_group_id" {
-    type = string
-}
-
-variable "labels" {
-  type    = map
-  default = {}
-}
-
 
 variable "schematics" {
   type    = bool
@@ -163,16 +154,6 @@ variable "log_flavor" {
 # Info about the OpenShift cluster logging will be installed into
 ##################################################################################
 
-variable "cluster_name" {
-  type			= string
-  description	= "Cluster name."
-}
-
-
-variable "worker_pool_name" {
-  type			= string
-  description	= "pool name."
-}
 
 variable "vpc_id" {
   type			= string
