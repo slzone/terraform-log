@@ -7,7 +7,8 @@
 ##################################################################################
 
 variable "vpc_zone_names" {
-  type    = list(string)
+  #type    = list(string)
+  type = map
 }
 
 # variable "vpc_subnet_ids" {
