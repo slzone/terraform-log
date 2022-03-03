@@ -9,6 +9,7 @@
 variable "vpc_zone_names" {
   #type    = list(string)
   type = map
+  default = { }
 }
 
 # variable "vpc_subnet_ids" {
