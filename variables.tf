@@ -10,10 +10,10 @@ variable "vpc_zone_names" {
   type    = list(string)
 }
 
-variable "vpc_subnet_ids" {
-  type        = list(string)
-  description = "Subnet IDs"
-}
+# variable "vpc_subnet_ids" {
+#   type        = list(string)
+#   description = "Subnet IDs"
+# }
 
 variable "worker_count" {
   type = number
