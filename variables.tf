@@ -155,10 +155,10 @@ variable "log_flavor" {
 ##################################################################################
 
 
-variable "vpc_id" {
-  type			= string
-  description	= "VPC ID."
-}
+# variable "vpc_id" {
+#   type			= string
+#   description	= "VPC ID."
+# }
 
 
 variable "node_select" {
