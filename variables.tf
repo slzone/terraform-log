@@ -11,6 +11,15 @@
 # Copyright 2020 IBM
 #####################################################
 
+##################################################################################
+# Logging Configuration
+##################################################################################
+
+##################################################################################
+# Info about the OpenShift cluster logging will be installed into
+##################################################################################
+
+
 variable "cluster_name" {
   description = "Name of the cluster"
   type        = string
@@ -84,40 +93,6 @@ variable "taints" {
   description = "Set taints to worker nodes."
   default     = null
 }
-
-
-
-# variable "vpc_zone_names" {
-#   #type    = list(string)
-#   type = map
-#   default = { }
-# }
-
-# # variable "vpc_subnet_ids" {
-# #   type        = list(string)
-# #   description = "Subnet IDs"
-# # }
-
-# variable "worker_count" {
-#   type = number
-#   default = 1
-# }
-
-# variable "entitlement" {
-#   description = "Name of entittlement, use for openshift cluster"
-#   type        = string
-#   default     = null
-# }
-
-# variable "taints" {
-#   type = list(object({
-#     key    = string
-#     value  = string
-#     effect = string
-#   }))
-#   description = "Set taints to worker nodes."
-#   default     = null
-# }
   
 variable "ibmcloud_api_key" {
     type = string
@@ -136,47 +111,4 @@ variable "schematics" {
   type    = bool
   default = true
   description = "Set to false if you are not running this template in schematics"
-}
-
-
-##################################################################################
-# Logging Configuration
-##################################################################################
-
-variable "log_flavor" {
-  type        = string
-  default     = "mx2.4x32" 
-  description = "Flavor or machine type of the logging nodes. Memory must be at least 32 GB. List all flavors for each zone with: 'ibmcloud ks flavors --zone us-east-1'. Examples: 'mx2.4x32', 'mx2.8x64'"
-}
-
-
-##################################################################################
-# Info about the OpenShift cluster logging will be installed into
-##################################################################################
-
-
-# variable "vpc_id" {
-#   type			= string
-#   description	= "VPC ID."
-# }
-
-
-variable "node_select" {
-  type = string
-  default = ""
-}
-
-variable "enable_monitoring" {
-  type = bool
-  default = true
-}
-
-
-variable "prefix" {
-  description = "Prefix to name all the provisioned resources."
-
-  validation {
-    condition     = length(var.prefix) >= 4 && length(var.prefix) <= 30
-    error_message = "The prefix length has to be between 4 and 30 characters."
-  }
 }
